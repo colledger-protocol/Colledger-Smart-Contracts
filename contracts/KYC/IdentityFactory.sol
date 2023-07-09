@@ -5,6 +5,7 @@ pragma solidity >=0.8.0;
 import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "contracts/interfaces/IIdentity.sol";
+import "contracts/interfaces/IIDRegistry.sol";
 
 
 contract IdentityFactory is Initializable{
@@ -37,7 +38,10 @@ contract IdentityFactory is Initializable{
         address identity = ClonesUpgradeable.cloneDeterministic(identityImplementation, salt);
         identityAddress[_UID] = identity;
         IIdentity(identity).init(_UID, _countryCode);
+        IIDRegistry(identityRegistry).registerIdentity(identity);
     }
+
+    
 
 
 

@@ -8,39 +8,37 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URISto
 
 contract ImplementationInstitute is ERC721URIStorageUpgradeable {
 
-    uint degreeId;
+    uint degreeId; // No. of degrees minted.
 
-    address public admin;
-
-    string public collegeCode;
+    address public admin; // Admin for the Institute implementation.
 
     struct SemesterCredential{
-        uint semesterNumber;
-        uint totalSubjects;
-        uint[] subjectCodes;
-        uint[] subjectMarks; 
+        uint8 semesterNumber;
+        uint8 totalSubjects;
+        bytes8[] subjectCodes;
+        uint8[] subjectMarks; 
         bool isPassed; 
     }
 
     struct DegreeDetails{
-        uint programmeCode;
+        uint16 programmeCode;
         address ownerIdentity;
-        uint issueTime;
+        uint256 issueTime;
     }
 
     mapping(address=>mapping(uint=> mapping(uint=>SemesterCredential))) MarksheetCredential; // address => programmeCode => semesterNo
 
-    mapping(uint=>string) public subjectCode;
+    mapping(bytes8=>string) public subjectCode; // subject Code => Subject name.
 
-    mapping(uint=>uint) public programmeSemestersRequired; // Programme code => Semesters required to get SBT Degree issued.
+    mapping(uint16=>uint8) public programmeSemestersRequired; // Programme code => Semesters required to get SBT Degree issued.
 
     mapping(address=>bool) public isEnrolled;
 
-    mapping(address=>uint) public currentProgrammeCode;
+    mapping(address=>uint16) public currentProgrammeCode; // student identity => Current program
 
-    mapping(address=>uint) public currentSemester;
+    mapping(address=>uint8) public currentSemester;
 
-    mapping(uint=>DegreeDetails) public CredentialDetails;
+    mapping(uint256=>DegreeDetails) public CredentialDetails; // Degree ID => Degree Details.
 
     bool public mintingEnabled;
 
@@ -49,11 +47,10 @@ contract ImplementationInstitute is ERC721URIStorageUpgradeable {
         _;
     }
 
-    function init(string memory _entityName, address _portalAdmin, string memory _collegeCode) external initializer{
+    function init(string memory _entityName, address _portalAdmin) external initializer{
         require(_portalAdmin!=address(0),"Zero address.");
         __ERC721_init_unchained(_entityName, _entityName);
         admin = _portalAdmin;
-        collegeCode = _collegeCode;
     }
 
     function _transfer(address from, address to, uint256 tokenId) internal virtual override{
@@ -61,14 +58,14 @@ contract ImplementationInstitute is ERC721URIStorageUpgradeable {
         require(letTransfer,"You are not allowed to transfer a credential.");
     }
 
-    function enrollStudent(address _identity, uint _programme) external onlyAdmin {
+    function enrollStudent(address _identity, uint16 _programme) external onlyAdmin {
         isEnrolled[_identity] = true;
         currentProgrammeCode[_identity]=_programme;
         currentSemester[_identity] = 1;
     }
 
     function batchIssueSemesterCredential(address[] memory _identities,
-    uint _semesterNumber, uint _programmeCode,
+    uint8 _semesterNumber, uint _programmeCode,
     SemesterCredential[] memory _semesterCredential) 
     external onlyAdmin returns(bool){
         uint totalIdentities  = _identities.length;

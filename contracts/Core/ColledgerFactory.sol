@@ -10,17 +10,17 @@ import "./ImplementationInstitute.sol";
 contract Factory {
 
     address public admin;
+
     uint public totalEntities;
 
     struct EntityDetails {
         string entityType;
-        uint entityIdentity;
         address entityAddress;
     }
 
-    mapping(uint => EntityDetails) public entityRegistrationDetails;
+    mapping(address => EntityDetails) public entityRegistrationDetails; 
 
-    mapping(uint => bool) public identityUsed;
+    mapping(address => bool) public identityUsed;
 
     
 
@@ -29,14 +29,14 @@ contract Factory {
        _;
     }
 
-    function init() external {
-        admin = msg.sender;
+    function init(address _admin) external {
+        admin = _admin;
     }
 
     event CertificateCreated(string entityType, string entityName, address entityAddress);
 
     function createEmployerCertificate(
-        uint _identity,
+        address _identity,
         string memory _entityName,
         address _portalAdmin,
         uint _countryCode
@@ -58,16 +58,15 @@ contract Factory {
 
         totalEntities++;
 
-        EntityDetails storage entity = entityRegistrationDetails[totalEntities];
+        EntityDetails storage entity = entityRegistrationDetails[_identity];
 
         entity.entityAddress = certificateAddress;
-        entity.entityIdentity = _identity;
         entity.entityType = "Employer";   
         identityUsed[_identity] = true;   
     }
 
     function createInstituteCertificate(
-        uint _identity,
+        address _identity,
         string memory _entityName,
         address _portalAdmin,
         string memory _collegeCode,
@@ -89,16 +88,15 @@ contract Factory {
 
         totalEntities++;
 
-        EntityDetails storage entity = entityRegistrationDetails[totalEntities];
+        EntityDetails storage entity = entityRegistrationDetails[_identity];
 
         entity.entityAddress = certificateAddress;
-        entity.entityIdentity = _identity;
         entity.entityType = "Institute";   
         identityUsed[_identity] = true; 
     }
 
-    function getEntityAddress(uint entityNumber) external view returns(address) {
-        return entityRegistrationDetails[entityNumber].entityAddress;
+    function getEntityAddress(address _identity) external view returns(address) {
+        return entityRegistrationDetails[_identity].entityAddress;
     }
 
     

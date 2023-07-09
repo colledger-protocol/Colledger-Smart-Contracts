@@ -14,8 +14,10 @@ contract ColledgerIdentity is Initializable {
 
 IColledgerFactory public colledgerFactory; 
 
-bytes identificationNumber;
-uint8 countryCode;
+address admin;
+
+bytes private identificationNumber;
+uint8 private countryCode;
 
 address[] instituteCredentialAddresses;
 address[] employerCredentialAddresses;
@@ -23,17 +25,22 @@ address[] employerCredentialAddresses;
 address lastEmployer;
 address lastInstitution;
 
+modifier onlyAdmin() {
+    require(msg.sender==admin,"Not admin.");
+    _;
+}
+
 function init(bytes memory _UID, uint8 _countryCode) external initializer { 
     identificationNumber = _UID;
     countryCode = _countryCode;
 }
 
-function addInstitute(address _institute) external {
+function addInstitute(address _institute) external onlyAdmin{
     instituteCredentialAddresses.push(_institute);
     lastInstitution = _institute;
 }
 
-function addEmployer(address _employer) external {
+function addEmployer(address _employer) external onlyAdmin{
     employerCredentialAddresses.push(_employer);
     lastEmployer = _employer;
 }

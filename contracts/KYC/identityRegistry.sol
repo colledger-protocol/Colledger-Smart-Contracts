@@ -12,22 +12,25 @@ contract identityRegistry is Initializable {
         uint8 countryCode;
     }
 
-    address admin;
+    address public admin;
+
+    address public identityFactory;
 
     mapping(address => bool) identityVerified;
 
     mapping(address => IdentityStorage) storeIdentity;
 
     modifier onlyAdmin() {
-        require(msg.sender == admin,"Not admin.");
+        require(msg.sender == admin || msg.sender == identityFactory,"Not admin.");
         _;
     }
 
-    function init(address _admin) external initializer {
+    function init(address _admin, address _identityFactory) external initializer {
         admin = _admin;
+        identityFactory = _identityFactory;
     } 
 
-    function registerIdentity(address _identity) external returns(bool) {
+    function registerIdentity(address _identity) external onlyAdmin returns(bool) {
         require(_identity!=address(0), "Address Zero.");
         storeIdentity[_identity].UID = IIdentity(_identity).getUID();
         storeIdentity[_identity].countryCode = IIdentity(_identity).getCountryCode();
