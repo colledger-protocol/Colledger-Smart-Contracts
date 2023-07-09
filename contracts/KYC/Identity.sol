@@ -2,28 +2,48 @@
 
 pragma solidity ^0.8.17;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
 interface IColledgerFactory {
 
     function verifyIdentity(address _identity) external view returns(bool);
 
 }
 
+contract ColledgerIdentity is Initializable {
 
-contract ColledgerIdentity {
+IColledgerFactory public colledgerFactory; 
 
-IColledgerFactory colledgerFactory; 
-
-uint identificationNumber;
-uint countryCode;
+bytes identificationNumber;
+uint8 countryCode;
 
 address[] instituteCredentialAddresses;
 address[] employerCredentialAddresses;
 
-address currentEmployer;
-address currentInstitution;
+address lastEmployer;
+address lastInstitution;
 
-function verifyIdentity() external view returns(bool) {
-    return colledgerFactory.verifyIdentity(address(this));
+function init(bytes memory _UID, uint8 _countryCode) external initializer { 
+    identificationNumber = _UID;
+    countryCode = _countryCode;
+}
+
+function addInstitute(address _institute) external {
+    instituteCredentialAddresses.push(_institute);
+    lastInstitution = _institute;
+}
+
+function addEmployer(address _employer) external {
+    employerCredentialAddresses.push(_employer);
+    lastEmployer = _employer;
+}
+
+function getUID() external view returns(bytes memory) {
+    return identificationNumber;
+}
+
+function getCountryCode() external view returns(uint8){
+    return countryCode;
 }
 
 }
